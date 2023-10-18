@@ -43,7 +43,9 @@ install_libraries <- function() {
 
   # Select directory You want to install WRF model
   wrf_root <- rstudioapi::selectDirectory()
-
+  # if only '~' instead of $HOME, extracting will get error
+  if (wrf_root == "~") wrf_root <- Sys.getenv('HOME') 
+  
   # Environment Variables
   Sys.setenv(ODIR=paste0(wrf_root, "/WRF-Model"))
   Sys.setenv(PATH=paste0(Sys.getenv('PATH'), ":", Sys.getenv('ODIR'), "/bin"))
@@ -82,7 +84,7 @@ install_libraries <- function() {
     # Extracting file
     if (!dir.exists(paste0(outlib_dir, "/", libs[lib, 2]))) {
       message(paste0("Extracting ", libs[lib, 1], "file .... \n"))
-      untar(lf, exdir = outlib_dir)
+      untar(lf, exdir = outlib_dir, extras = '-z')
     }
   }
 
