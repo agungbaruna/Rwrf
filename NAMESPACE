@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+import(raster)
+import(ncdf4)
+import(glue)

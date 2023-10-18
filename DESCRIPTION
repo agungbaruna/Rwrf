@@ -1,0 +1,11 @@
+Package: Rwrf
+Type: Package
+Title: Weather Research Forecasting (WRF) in R
+Version: 0.1.0
+Author: Agung Baruna Setiawan Noor
+Maintainer: Agung Baruna Setiawan Noor <nooragung97@gmail.com>
+Depends: raster, ncdf4, glue, 
+Description: This package is used for Pre and Post Processing of Weather Research Forecasting (WRF).
+License: GPL
+Encoding: UTF-8
+LazyData: true
