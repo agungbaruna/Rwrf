@@ -2,11 +2,11 @@
 
 # Require Library
 if (!requireNamespace('ncdf4', quietly = T) &
-    !requireNamespace('raster', quietly = T)) {
-  stop("Please install ncdf4 and raster!")
+    !requireNamespace('terra', quietly = T)) {
+  stop("Please install ncdf4 and terra!")
 } else {
   library(ncdf4)
-  library(raster)
+  library(terra)
 }
 
 wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
@@ -31,17 +31,17 @@ wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
   XTIME <- ncvar_get(wrf.file, "XTIME")
   if (nlev == 1){
 
-    if (var.name == "rain"){
+    if (var.name == "rain" & length(XTIME) > 1){
       #Variable for estimated surface rainfall
       nc.var <- ncvar_get(wrf.file, "RAINC") + ncvar_get(wrf.file, "RAINNC")
       rain <- array(dim = c(length(XLONG), length(XLAT), length(XTIME)))
-      rain[,,1] <- nc.var[,,1]
+      rain[, , 1] <- nc.var[, , 1]
 
       counter = 1
-      for (waktu in seq_along(XTIME)+1){
-        rain[,,waktu] <- nc.var[,,waktu] - nc.var[,,counter]
+      for (nt in seq_along(XTIME) + 1){
+        rain[ , , nt] <- nc.var[ , , nt] - nc.var[ , , counter]
 
-        if (waktu == length(XTIME)){
+        if (nt == length(XTIME)){
           break
         } else {
           counter <- counter + 1
@@ -54,7 +54,7 @@ wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
       v10 <- ncvar_get(wrf.file, "V10")^2
 
       nc.var <- sqrt(u10 + v10)
-      nc.var <- nc.var*3.6
+      nc.var <- nc.var * 3.6
 
     } else if (var.name == "wdir") {
       u10 <- ncvar_get(wrf.file, "U10")
@@ -62,12 +62,6 @@ wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
 
       nc.var <- atan2(v10, -u10) * 180 / pi + 90
       nc.var[nc.var < 0] <- nc.var[nc.var < 0] + 360
-
-    } else if (var.name == "wdir_met") {
-      u10 <- ncvar_get(wrf.file, "U10")
-      v10 <- ncvar_get(wrf.file, "V10")
-
-      nc.var <- (180 / pi * atan2(-u10, -v10)) + 180
 
     } else if (var.name == "rh"){ # Relative humidity at 2 m
       psfc <- ncvar_get(wrf.file, "PSFC")
@@ -91,7 +85,7 @@ wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
 
     } else if (var.name == "sh"){# Specific humidity
       nc.var <- ncvar_get(wrf.file, "Q2")
-      nc.var <- nc.var/(1+nc.var)
+      nc.var <- nc.var / (1 + nc.var)
 
     } else {
       #Other Variable
@@ -101,24 +95,24 @@ wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
     # Make a raster for 3D
     ## Check if XTIME == 1
     if (length(XTIME) == 1) {
-      w.r   <- raster(nrows = length(XLAT), ncols = length(XLONG),
-                     xmn = min(XLONG), xmx = max(XLONG), ymn = min(XLAT), ymx = max(XLAT))
+      w.r   <- rast(nrows = length(XLAT), ncols = length(XLONG),
+                    xmin = min(XLONG), xmax = max(XLONG), ymin = min(XLAT), ymax = max(XLAT))
       w.r[] <- as.vector(nc.var)
-      w.r   <- flip(w.r, "y")
+      w.r   <- flip(w.r, "vertical")
     } else {
-      w.r   <- brick(nrows = length(XLAT), ncols = length(XLONG), nl = length(XTIME),
-                     xmn = min(XLONG), xmx = max(XLONG), ymn = min(XLAT), ymx = max(XLAT))
+      w.r   <- rast(nrows = length(XLAT), ncols = length(XLONG), nlyrs = length(XTIME),
+                    xmin = min(XLONG), xmax = max(XLONG), ymin = min(XLAT), ymax = max(XLAT))
       w.r[] <- nc.var
-      w.r   <- flip(w.r, "y")
+      w.r   <- flip(w.r, "vertical")
     }
 
   } else {
     #Make a raster for 4D
     nc.var <- ncvar_get(wrf.file, var.name)[,,nlev,]
-    w.r    <- brick(nrows = length(XLAT), ncols = length(XLONG), nl = length(XTIME),
-                    xmn = min(XLONG), xmx = max(XLONG), ymn = min(XLAT), ymx = max(XLAT))
+    w.r    <- rast(nrows = length(XLAT), ncols = length(XLONG), nlyrs = length(XTIME),
+                    xmin = min(XLONG), xmax = max(XLONG), ymin = min(XLAT), ymax = max(XLAT))
     w.r[] <- nc.var
-    w.r   <- flip(w.r, "y")
+    w.r   <- flip(w.r, "vertical")
   }
 
   #Get Global Attribute
@@ -130,8 +124,9 @@ wrfout_raster <- function(wrfout.file, var.name, timezone = "UTC", nlev = 1) {
 
   #Assign time format
   xtt <- as.POSIXct(XTIME * 60, format = "%Y-%m-%d %H:%M:%S", origin = xt, tz = timezone)
-  w.r <- setZ(w.r, xtt)
+  time(w.r) <- xtt
 
   #Return the raster
   return(w.r)
 }
+wrfout_raster('inst/extdata/wrfout_d02_2022-01-02_02:00:00', 'ws') |> plot()
