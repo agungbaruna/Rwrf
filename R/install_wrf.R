@@ -1,11 +1,13 @@
 # Function for installing WRF Model
 
-install_wrf <- function() {
+install_wrf <- function(install_dir = NULL) {
   # Current directory
   cur_dir <- getwd()
 
-  # Select directory You want to install WRF model
-  wrf_root <- rstudioapi::selectDirectory()
+  # Select directory You want to install WRF model. Default: $HOME
+  if (is.null(install_dir)) {
+    wrf_root <- Sys.setenv("HOME")
+  }
 
   # Environment Variables
   Sys.setenv(ODIR=paste0(wrf_root, "/WRF-Model"))
@@ -30,10 +32,14 @@ install_wrf <- function() {
   system('./clean -a')
 
   # Option for specific OS
-  # ---- #
+  if (grepl('mac', osVersion)) {
+    conf_opt <- 35
+  } else if (grepl('ubuntu', osVersion) | grepl('almalinux', osVersion)) {
+    conf_opt <- 34
+  }
 
   # Installing WRF
-  system(paste0("/bin/bash -c ./configure <<< $'35\r1\r'"))
+  system(paste0("/bin/bash -c ./configure <<< ", "$'", conf_opt, "\r1\r'"))
   system("./compile em_real -j 4")
 
   # Checking programs
@@ -41,6 +47,12 @@ install_wrf <- function() {
     message('
     ------------------------------------------------
     !!!!     WRF was installed successfully     !!!!
+    ------------------------------------------------
+    ')
+  } else {
+    stop('
+    ------------------------------------------------
+    !!!!  Error. Please check log in terminal   !!!!
     ------------------------------------------------
     ')
   }
