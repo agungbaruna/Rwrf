@@ -32,9 +32,10 @@ install_wrf <- function(install_dir = NULL) {
   system('./clean -a')
 
   # Option for specific OS
-  if (grepl('mac', osVersion)) {
+  os_ver <- tolower(osVersion)
+  if (grepl('mac', os_ver)) {
     conf_opt <- 35
-  } else if (grepl('ubuntu', osVersion) | grepl('almalinux', osVersion)) {
+  } else if (grepl('ubuntu|almalinux', os_ver)) {
     conf_opt <- 34
   }
 

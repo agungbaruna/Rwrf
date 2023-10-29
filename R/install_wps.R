@@ -34,9 +34,11 @@ install_wps <- function(install_dir = NULL) {
   system('./clean -a')
 
   # Option for specific OS. Automatically chose dmpar
-  if (grepl('mac', osVersion)) {
+  # Get Operating System version
+  os_ver <- tolower(osVersion)
+  if (grepl('mac', os_ver)) {
     conf_opt <- 19
-  } else if (grepl('ubuntu|almalinux', osVersion)) {
+  } else if (grepl('ubuntu|almalinux', os_ver)) {
     conf_opt <- 3
   }
 
