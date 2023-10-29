@@ -1,6 +1,6 @@
 # Function to install libraries that required for WRF simulation
 
-install_libraries <- function() {
+install_libraries <- function(install_dir = NULL) {
   # Get architecture and os
   arch <- version$arch
   os   <- version$os
@@ -36,16 +36,26 @@ install_libraries <- function() {
         } else {next}
       }
     }
+  } else if (grepl('almalinux', os_ver)) {
+    for (nc in seq_along(cmp)) {
+      if (!grepl(rmp[nc], cmp[nc])) {
+        stop(paste0("Please install ", rmp[nc], "with this command: sudo dnf install ", rmp[nc], "!!!"))
+      } else {next}
+    }
   }
 
   # Project directory
-  proj_dir <- rstudioapi::getActiveProject()
+  proj_dir <- getwd()
 
   # Select directory You want to install WRF model
-  wrf_root <- rstudioapi::selectDirectory()
+  if (is.null(wrf_root)) {
+    wrf_root <- Sys.getenv('HOME')
+  } else {
+    wrf_root <- install_dir
+  }
   # if only '~' instead of $HOME, extracting will get error
-  if (wrf_root == "~") wrf_root <- Sys.getenv('HOME') 
-  
+  if (wrf_root == "~") wrf_root <- Sys.getenv('HOME')
+
   # Environment Variables
   Sys.setenv(ODIR=paste0(wrf_root, "/WRF-Model"))
   Sys.setenv(PATH=paste0(Sys.getenv('PATH'), ":", Sys.getenv('ODIR'), "/bin"))
