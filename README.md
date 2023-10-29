@@ -1,8 +1,8 @@
 # Rwrf: Installing, Simulating, and Visualizing WRF with R
 
-This package is use for installing, running, and visualizing WRF with R Programming Language. You can install [WRF](https://github.com/wrf-model/WRF) and [WPS](https://github.com/wrf-model/WPS) with `install_wrf()` and `install_wps()` in your R terminal, respectively. Before installing WRF, you should install dependencies package to run it, like NetCDF, mpich/openMPI, HDF5, zlib, libpng, and jasper. Luckily, You can install all of them with `install_libraries()` function in this package.
+This package is used for installing, running, and visualizing WRF with R Programming Language. You can install [WRF](https://github.com/wrf-model/WRF) and [WPS](https://github.com/wrf-model/WPS) with `install_wrf()` and `install_wps()` in your R terminal. Before installing WRF, you should install dependencies package to run it, like NetCDF, openMPI, HDF5, zlib, libpng, and jasper. Luckily, You can install all of them with `install_libraries()` function from this package.
 
-This script was tested on Ubuntu 22.04, Mac M1, and Windows Subsystem Linux with Ubuntu Distro 22.04
+This script was tested on Ubuntu 22.04, Almalinux, Mac M1, and Windows Subsystem Linux with Ubuntu Distro 22.04
 
 > THIS SCRIPT CAN'T RUN ON WINDOWS MACHINE, EXCEPT ON WINDOWS SUBSYSTEM LINUX (WSL)
 
@@ -10,7 +10,11 @@ This script was tested on Ubuntu 22.04, Mac M1, and Windows Subsystem Linux with
 
 ### Installing the libraries
 
+Easily, You just call the function `install_libraries(install_dir = ...)`, which `install_dir` argument is your directory that You want to install on your local machine. The default directory of installed libraries in `$HOME`. You can call `Sys.getenv('HOME')` if You want to know where is `$HOME`.
+
 ### Installing WRF and WPS
+
+After libraries have been installed, run `install_wrf(install_dir = ...)` and `install_wps(install_dir = ...)` sequentially. Default directory folder is `$HOME`.
 
 ### Downloading the mandatory data
 
