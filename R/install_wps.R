@@ -1,11 +1,13 @@
 # Function for installing WRF Pre-Processing tools (WPS)
 
-install_wps <- function() {
+install_wps <- function(install_dir = NULL) {
   # Current directory
   cur_dir <- getwd()
 
-  # Select directory You want to install WRF model
-  wrf_root <- rstudioapi::selectDirectory()
+  # Select directory You want to install WRF model. Default: $HOME
+  if (is.null(install_dir)) {
+    wrf_root <- Sys.getenv("HOME")
+  }
 
   # Environment Variables
   Sys.setenv(ODIR=paste0(wrf_root, "/WRF-Model"))
@@ -31,11 +33,15 @@ install_wps <- function() {
   # Deep clean for recompiling
   system('./clean -a')
 
-  # Option for specific OS
-  # ---- #
+  # Option for specific OS. Automatically chose dmpar
+  if (grepl('mac', osVersion)) {
+    conf_opt <- 19
+  } else if (grepl('ubuntu|almalinux', osVersion)) {
+    conf_opt <- 3
+  }
 
   # Installing WPS
-  system(paste0("/bin/bash -c ./configure <<< $'19\r'")) # 3 for Ubuntu
+  system(paste0("/bin/bash -c ./configure <<< ", "$'", conf_opt, "\r'"))
   # Add -lgomp lib to configure.wps
   system("sed -i.change -r 's/-lnetcdff -lnetcdf/-lnetcdf -lnetcdff -lgomp/g' configure.wps && ./compile")
 
@@ -47,9 +53,9 @@ install_wps <- function() {
     ------------------------------------------------
     ')
   } else {
-    message('
+    stop('
     ------------------------------------------------
-    !!!!     Error. Please check the log file   !!!!
+    !!!!  Error. Please check log in terminal   !!!!
     ------------------------------------------------
     ')
   }
